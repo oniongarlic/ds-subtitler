@@ -92,7 +92,7 @@ fprintf(stdout, "\n\n");
 free(buffer);
 }
 
-void process_buffer(float pos, const short* aBuffer, size_t aBufferSize)
+static void ds_process_buffer(float pos, const short* aBuffer, size_t aBufferSize)
 {
 int j;
 Metadata *result = DS_SpeechToTextWithMetadata(ms, aBuffer, aBufferSize, 1);
@@ -197,8 +197,8 @@ fprintf(stderr, "Buffer size: %d\n", dsd_size);
 sf_command(snd_input, SFC_SET_NORM_FLOAT, NULL, SF_FALSE);
 
 ds_i=0;
-ratio=16000.0/48000.0;
 
+ratio=16000.0/48000.0;
 rsh=resample_open(1, ratio, ratio);
 
 while (1) {
@@ -220,6 +220,7 @@ while (1) {
   exit(1);
  }
 
+ // Denoise all channels and get audio level
  for (ch=0;ch<channels;ch++) {
   for (sc=0;sc<FRAME_SIZE;sc++)
    chs[sc]=data[sc*channels+ch];
@@ -239,6 +240,7 @@ while (1) {
   ds_i+=sc;
  }
 
+ // Check for silence
  if (split>0 && prn[0]<silence && rn[0]<silence) {
   sframes++;
  } else if (split>0 && rn[0]>silence) {
@@ -273,8 +275,8 @@ while (1) {
    fdata[fi]=(short)(rsd[fi]);
   }
 
-  printf("%d\n", splits);
-  process_buffer(base_sec, fdata, sn);
+  fprintf(stdout, "%d\n", splits);
+  ds_process_buffer(base_sec, fdata, sn);
 
   free(fdata);
   free(rsd);
