@@ -41,7 +41,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 ModelState *ms;
 
-void print_srt_time(float seconds)
+static void fprint_srt_time(FILE *stream, float seconds)
 {
 int hours=0,minutes=0;
 int whole=floor(seconds);
@@ -54,43 +54,57 @@ if (seconds>60) {
 }
 isec=isec % 60;
 
-printf("%02d:%02d:%02d,%03d", hours, minutes, isec, fraction);
+fprintf(stream, "%02d:%02d:%02d,%03d", hours, minutes, isec, fraction);
+}
+
+void print_result(float pos, const CandidateTranscript* ts)
+{
+int i,r=0;
+float spos=pos,epos=pos;
+char *buffer;
+
+buffer=malloc(ts->num_tokens);
+
+for (i=0;i<ts->num_tokens;i++) {
+ TokenMetadata t=ts->tokens[i];
+
+ if (i==0) {
+  spos=t.start_time+pos;
+ } else if (i==ts->num_tokens-1) {
+  epos=t.start_time+pos;
+ }
+ r++;
+ if (r>48 && *t.text==' ') {
+  buffer[i]='\n';
+  r=0;
+ } else {
+  buffer[i]=*t.text;
+ }
+}
+buffer[i]=(char)NULL;
+
+fprint_srt_time(stdout, spos);
+fprintf(stdout, " --> ");
+fprint_srt_time(stdout, epos);
+fprintf(stdout, "\n%s", buffer);
+fprintf(stdout, "\n\n");
+
+free(buffer);
 }
 
 void process_buffer(float pos, const short* aBuffer, size_t aBufferSize)
 {
-int i=0,j,r=0;
-float spos=pos,epos=pos;
-char buffer[1024];
+int j;
 Metadata *result = DS_SpeechToTextWithMetadata(ms, aBuffer, aBufferSize, 1);
+
+if (result->num_transcripts==0)
+ return;
 
 for (j=0; j < result->num_transcripts; ++j) {
  const CandidateTranscript* ts = &result->transcripts[j];
 
- for (i=0;i<ts->num_tokens;i++) {
-  TokenMetadata t=ts->tokens[i];
-
-  if (i==0) {
-   spos=t.start_time+pos;
-  } else if (i==ts->num_tokens-1) {
-   epos=t.start_time+pos;
-  }
-  r++;
-  if (r>48 && *t.text==' ') {
-   buffer[i]='\n';
-   r=0;
-  } else {
-   buffer[i]=*t.text;
-  }
- }
+ print_result(pos, ts);
 }
-buffer[i]=NULL;
-
-print_srt_time(spos);
-printf(" --> ");
-print_srt_time(epos);
-printf("\n%s", buffer);
-printf("\n\n");
 
 DS_FreeMetadata(result);
 }
