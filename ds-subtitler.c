@@ -207,10 +207,10 @@ while ((opt = getopt(argc, argv, "hrm:s:b:t:h:f:l:w:")) != -1) {
         fprintf(stderr, " -b beamwidth 	Beam width\n");
         fprintf(stderr, " -m model	Model to use, default is %s\n", MODEL);
         fprintf(stderr, " -s scorer	Scorer to use, default is %s\n", SCORER);
-        fprintf(stderr, " -w words.txt	Read hotwords from file");
-        fprintf(stderr, " -f 2		Frames to use for silence detection for splitting");
-        fprintf(stderr, " -l 4		Minimum length in seconds to decode");
-        fprintf(stderr, " -r 		Use raw audio for DS");
+        fprintf(stderr, " -w words.txt	Read hotwords from file\n");
+        fprintf(stderr, " -f 2		Frames to use for silence detection for splitting\n");
+        fprintf(stderr, " -l 4		Minimum length in seconds to decode\n");
+        fprintf(stderr, " -r 		Use raw audio for DS\n");
         exit(1);
     }
 }
