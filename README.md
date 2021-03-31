@@ -4,6 +4,5 @@ Generate SRT subtitles from libsndfile supported audio files using Mozilla DeepS
 
 ## Issues
 
-* Uggly
-* Makes a lot of assumptions about model and scorer location
-* Only 1 channel and 48kHz input supported and tested right now
+* The code is uggly, very ugly
+* Some cases are not handled properly yet
