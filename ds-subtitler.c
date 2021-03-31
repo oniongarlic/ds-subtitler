@@ -111,9 +111,38 @@ for (i=0;i<result->num_transcripts;i++) {
 DS_FreeMetadata(result);
 }
 
+int read_hotwords(const char *file)
+{
+FILE *stream;
+char *line=NULL;
+size_t len=0;
+ssize_t nread;
+int c=0;
+
+stream = fopen(file, "r");
+if (stream == NULL) {
+ perror("fopen");
+ return -1;
+}
+
+while ((nread = getline(&line, &len, stream)) != -1) {
+ if (line[len-1]=='\n')
+   line[len-1]=0;
+ if (strlen(line)==0)
+  continue;
+ DS_AddHotWord(ms, line, 10.0);
+ c++;
+}
+
+free(line);
+fclose(stream);
+
+return c;
+}
+
 int main(int argc, char **argv)
 {
-const char *file_input, *model, *scorer;
+const char *file_input, *model, *scorer, *hotwords=NULL;
 SNDFILE *snd_input=NULL;
 SF_INFO info_in;
 DenoiseState **st;
@@ -142,7 +171,7 @@ scorer=SCORER;
 split=16;
 split_sec=4;
 
-while ((opt = getopt(argc, argv, "hrm:s:b:t:h:f:l:")) != -1) {
+while ((opt = getopt(argc, argv, "hrm:s:b:t:h:f:l:w:")) != -1) {
   switch (opt) {
   case 'r':
    denoise=0;
@@ -155,6 +184,9 @@ while ((opt = getopt(argc, argv, "hrm:s:b:t:h:f:l:")) != -1) {
   break;
   case 's':
    scorer=optarg;
+  break;
+  case 'w':
+   hotwords=optarg;
   break;
   case 'f':
    split=atoi(optarg);
@@ -175,6 +207,10 @@ while ((opt = getopt(argc, argv, "hrm:s:b:t:h:f:l:")) != -1) {
         fprintf(stderr, " -b beamwidth 	Beam width\n");
         fprintf(stderr, " -m model	Model to use, default is %s\n", MODEL);
         fprintf(stderr, " -s scorer	Scorer to use, default is %s\n", SCORER);
+        fprintf(stderr, " -w words.txt	Read hotwords from file");
+        fprintf(stderr, " -f 2		Frames to use for silence detection for splitting");
+        fprintf(stderr, " -l 4		Minimum length in seconds to decode");
+        fprintf(stderr, " -r 		Use raw audio for DS");
         exit(1);
     }
 }
@@ -218,6 +254,11 @@ if (strlen(scorer)>0) {
 if (cbw>0) {
 	DS_SetModelBeamWidth(ms, cbw);
 	fprintf(stderr, "Current beam width: %d\n", DS_GetModelBeamWidth(ms));
+}
+
+if (hotwords) {
+	int wc=read_hotwords(hotwords);
+	fprintf(stderr, "Added hotwords: %d\n", wc);
 }
 
 st=malloc(channels * sizeof(DenoiseState *));
