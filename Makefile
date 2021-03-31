@@ -1,6 +1,6 @@
 SRC=ds-subtitler.c
 APPS=$(SRC:%.c=%)
-CFLAGS=-O2 -pipe -Wall
+CFLAGS=-O2 -ggdb -pipe -Wall
 CC=gcc
 
 LIBS_DS=$(shell pkg-config --cflags --libs sndfile libresample rnnoise) -lresample -ldeepspeech -lm
