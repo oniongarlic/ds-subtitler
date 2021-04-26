@@ -4,6 +4,7 @@ Generate SRT subtitles from libsndfile supported audio files using Mozilla DeepS
 
 ## Requires
 
+* deepspeech
 * sndfile
 * libresample
 * rnnoise
