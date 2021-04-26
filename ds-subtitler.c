@@ -1,7 +1,7 @@
 /*
 Generate SRT subtitles using Mozilla DeepSpeech.
 
-Copyright (C) 2020  Kaj-Michael Lang <milang@tal.org>
+Copyright (C) 2021  Kaj-Michael Lang <milang@tal.org>
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -348,14 +348,7 @@ while (1) {
   if (!rsd)
    exit(1);
 
-#if 1
   sn=resample_process(rsh, ratio, ds_data, ds_i, 1, &inu, rsd, ds_i);
-#else
-  sn=ds_i/3;
-  for (sc=0;sc<sn;sc++) {
-   rsd[sc]=ds_data[sc*3];
-  }
-#endif
 
   // A convert to 16-bit for DS
   fdata=malloc(sn*sizeof(short));
